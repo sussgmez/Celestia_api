@@ -98,7 +98,7 @@ class OrderDetail(models.Model):
     
 
 class CarouselImage(models.Model):
-    Image = models.ImageField(_("Carousel"), upload_to='media/carousel/')   
+    image = models.ImageField(_("Carousel"), upload_to='media/carousel/')   
     url = models.URLField(_("URL"), max_length=200)
 
     class Meta:
