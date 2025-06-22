@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import Product, ProductImage, ProductInventory, Order, OrderDetail, Category, ProductSize, ProductColor
+from .models import Product, ProductImage, ProductInventory, Order, OrderDetail, Category, ProductSize, ProductColor, CarouselImage
 
+
+@admin.register(CarouselImage)
+class CarouselImageAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(ProductSize)
 class ProductSizeAdmin(admin.ModelAdmin):

@@ -40,7 +40,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey("ecommerce.Product", verbose_name=_("Producto"), on_delete=models.CASCADE)
-    image = models.ImageField(_("Imagen"), upload_to='ecommerce/products/')
+    image = models.ImageField(_("Imagen"), upload_to='media/products/')
     
     class Meta:
         verbose_name = _("productimage")
@@ -97,6 +97,15 @@ class OrderDetail(models.Model):
         return f'{self.order.id}.{self.id} - {self.order.user} - {self.product_inventory} - {self.quantity}'
     
 
+class CarouselImage(models.Model):
+    Image = models.ImageField(_("Carousel"), upload_to='media/carousel/')   
+    url = models.URLField(_("URL"), max_length=200)
+
+    class Meta:
+        verbose_name = _("carouselimage")
+        verbose_name_plural = _("carouselimages")
+
+
 @receiver(pre_save, sender=OrderDetail)
 def order_detail_pre_save_receiver(sender, instance: OrderDetail, **kwargs):
     if instance.pk is None:
@@ -118,26 +127,3 @@ def order_detail_pre_delete_receiver(sender, instance: OrderDetail, **kwargs):
     instance.product_inventory.stock += instance.quantity
     instance.product_inventory.save()
 
-"""
-@receiver(pre_save, sender=OrderDetail)
-def order_detail_pre_save_receiver(sender, instance, **kwargs):
-    if instance.pk is None:
-        if instance.quantity > instance.product.stock:
-            raise ValidationError('Cantidad no disponible')
-        else:
-            instance.product.stock-= instance.quantity
-            instance.product.save()
-    else:
-        quantity = instance.quantity - OrderDetail.objects.get(id=instance.id).quantity 
-        if quantity > instance.product.stock:
-            raise ValidationError('Cantidad no disponible')
-        else:
-            instance.product.stock-= quantity
-            instance.product.save()
-
-
-@receiver(pre_delete, sender=OrderDetail)
-def order_detail_pre_delete_receiver(sender, instance, **kwargs):
-    instance.product.stock += instance.quantity
-    instance.product.save()
-"""
