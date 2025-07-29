@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'simple_history',
     'rest_framework',
+    'authentication',
     'ecommerce',
 ]
 
@@ -126,3 +127,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIAL_URL = '/media/'
 MEDIAL_ROOT =  BASE_DIR / 'media'
+
+
+AUTH_USER_MODEL = "authentication.CustomUser"

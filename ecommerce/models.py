@@ -1,15 +1,18 @@
 from django.db import models
-from django.db.models.signals import pre_save, pre_delete
-from django.dispatch import receiver
-from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MaxValueValidator
 from simple_history.models import HistoricalRecords
 
 
 class Category(models.Model):
-    name = models.CharField(_("Categoría"), max_length=50)
+    subcategory_of = models.ForeignKey(
+        "ecommerce.Category",
+        verbose_name=_("Categoría"),
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    name = models.CharField(_("Nombre"), max_length=100)
 
     class Meta:
         verbose_name = _("category")
@@ -19,15 +22,32 @@ class Category(models.Model):
         return self.name
 
 
+class ProductImage(models.Model):
+    product_color = models.ForeignKey(
+        "ecommerce.ProductColor",
+        verbose_name=_(""),
+        on_delete=models.CASCADE,
+        related_name="product_image",
+    )
+    image = models.ImageField(_("Imagen"), upload_to="products")
+
+    class Meta:
+        verbose_name = _("productimage")
+        verbose_name_plural = _("productimages")
+
+
 class Product(models.Model):
     name = models.CharField(_("Nombre"), max_length=200)
-    description = models.TextField(_("Descripción"), blank=True, null=True)
-    price = models.FloatField(_("Precio"), validators=[MinValueValidator(0.0)])
-    discount = models.FloatField(_("Descuento"), default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
-    category = models.ForeignKey("ecommerce.Category", verbose_name=_("Categoría"), on_delete=models.CASCADE, blank=True, null=True)
-
-    created_at = models.DateTimeField(_("Fecha de creación"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("Última modificación"), auto_now=True)
+    description = models.TextField(_("Descripción"))
+    category = models.ForeignKey(
+        "ecommerce.Category",
+        verbose_name=_("Categoría"),
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    price = models.FloatField(_("Precio"))
+    by_size = models.BooleanField(_("¿Tiene varias tallas?"), default=True)
     history = HistoricalRecords()
 
     class Meta:
@@ -35,77 +55,76 @@ class Product(models.Model):
         verbose_name_plural = _("products")
 
     def __str__(self):
-        return f'ID #{self.id}'
+        return self.name
 
 
-class ProductImage(models.Model):
-    product = models.ForeignKey("ecommerce.Product", verbose_name=_("Producto"), on_delete=models.CASCADE)
-    image = models.ImageField(_("Imagen"), upload_to='media/products/')
-    
+class ProductColor(models.Model):
+    product = models.ForeignKey(
+        "ecommerce.Product", verbose_name=_("Producto"), on_delete=models.CASCADE
+    )
+    color = models.CharField(_("Color"), max_length=50)
+    discount = models.PositiveIntegerField(
+        _("Descuento"), default=0, validators=[MaxValueValidator(100)]
+    )
+    history = HistoricalRecords()
+
     class Meta:
-        verbose_name = _("productimage")
-        verbose_name_plural = _("productimages")
+        verbose_name = _("Product (color)")
+        verbose_name_plural = _("Products (color)")
 
     def __str__(self):
-        return f'{self.product.name} ({self.id})' 
+        return f"{self.product.name} ({self.color})"
 
 
 class ProductSize(models.Model):
+    product_color = models.ForeignKey(
+        "ecommerce.ProductColor",
+        verbose_name=_("Producto (Color)"),
+        related_name="productsize",
+        on_delete=models.CASCADE,
+    )
     size = models.CharField(_("Talla"), max_length=50)
+    stock = models.IntegerField(_("Stock"), default=0)
 
+    class Meta:
+        verbose_name = _("productsize")
+        verbose_name_plural = _("productsizes")
+        
     def __str__(self):
-        return self.size
-    
-class ProductColor(models.Model):
-    color = models.CharField(_("Color"), max_length=50)
-
-    def __str__(self):
-        return self.color
+        return f'{self.product_color} ({self.size})'
 
 
-class ProductInventory(models.Model):
-    product = models.ForeignKey("ecommerce.Product", verbose_name=_("Product"), on_delete=models.CASCADE)
-    size = models.ForeignKey("ecommerce.ProductSize", verbose_name=_(""), on_delete=models.CASCADE)
-    color = models.ForeignKey("ecommerce.ProductColor", verbose_name=_(""), on_delete=models.CASCADE)
-    stock = models.IntegerField(_("Cantidad"), validators=[MinValueValidator(0)])
+class Bill(models.Model):
+    STATUS = [
+        (0, "Pendiente"),
+        (1, "Aprobado"),
+        (2, "Rechazado"),
+    ]
+    user = models.ForeignKey(
+        "authentication.CustomUser", verbose_name=_("Usuario"), on_delete=models.CASCADE
+    )
+    status = models.IntegerField(_("Status"), choices=STATUS, default=0)
 
-    def __str__(self):
-        return f'{self.product.name} Talla: {self.size} Color: {self.color}'
 
 class Order(models.Model):
-    user = models.ForeignKey(User, verbose_name=_("Cliente"), on_delete=models.CASCADE)
-    date = models.DateTimeField(_("Fecha"), auto_now_add=True)
+    user = models.ForeignKey(
+        "authentication.CustomUser", verbose_name=_("Usuario"), on_delete=models.CASCADE
+    )
+    product = models.ForeignKey(
+        "ecommerce.ProductSize", verbose_name=_("Producto"), on_delete=models.CASCADE
+    )
+    quantity = models.PositiveIntegerField(_("Cantidad"))
+    bill = models.ForeignKey("ecommerce.Bill", verbose_name=_("Factura"), on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         verbose_name = _("order")
         verbose_name_plural = _("orders")
 
     def __str__(self):
-        return f'{self.id} - {self.user} - {self.date.strftime('%x %X')}'
-
-
-class OrderDetail(models.Model):
-    order = models.ForeignKey("ecommerce.Order", verbose_name=_("Orden"), on_delete=models.CASCADE)
-    product_inventory = models.ForeignKey("ecommerce.ProductInventory", verbose_name=_("Producto"), on_delete=models.CASCADE)
-    quantity = models.IntegerField(_("Cantidad"), validators=[MinValueValidator(0)])
-
-    class Meta:
-        verbose_name = _("orderdetail")
-        verbose_name_plural = _("order details")
-
-    def __str__(self):
-        return f'{self.order.id}.{self.id} - {self.order.user} - {self.product_inventory} - {self.quantity}'
+        return f'{self.user.email} | {self.product} | {self.quantity}'
     
 
-class CarouselImage(models.Model):
-    image = models.ImageField(_("Carousel"), upload_to='media/carousel/')   
-    url = models.URLField(_("URL"), max_length=200)
-
-    class Meta:
-        verbose_name = _("carouselimage")
-        verbose_name_plural = _("carouselimages")
-
-
+"""
 @receiver(pre_save, sender=OrderDetail)
 def order_detail_pre_save_receiver(sender, instance: OrderDetail, **kwargs):
     if instance.pk is None:
@@ -126,4 +145,6 @@ def order_detail_pre_save_receiver(sender, instance: OrderDetail, **kwargs):
 def order_detail_pre_delete_receiver(sender, instance: OrderDetail, **kwargs):
     instance.product_inventory.stock += instance.quantity
     instance.product_inventory.save()
+"""
+
 

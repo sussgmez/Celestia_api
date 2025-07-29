@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}
+  Iniciar Sesión
+{% endblock %}
+
+{% block content %}
+  <section class="section-login">
+    <div class="background-image">
+      <img src="{% static 'img/background-image.jpg' %}" alt="">
+    </div>
+    <div class="login">
+      <div class="header-form">
+        <h3>INICIAR SESIÓN</h3>
+      </div>
+      <form action="" class="login-form" id="id_login_form" method="post">
+        {% csrf_token %}
+        <div class="field">
+          <label for="id_email" class="label">Email</label>
+          {{ form.email }}
+        </div>
+        <div class="field">
+          <label for="id_password" class="label">Contraseña</label>
+          {{ form.password }}
+        </div>
+        {% if form.non_field_errors %}
+          <div class="errors">
+            {% for error in form.non_field_errors %}
+              <p class="error">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="login-buttons">
+          <button class="button login-button">Iniciar sesión</button>
+          <hr />
+          <a class="button signup-button" href="{% url 'signup' %}">Registrarse</a>
+        </div>
+      </form>
+    </div>
+  </section>
+{% endblock %}

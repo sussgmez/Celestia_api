@@ -1,0 +1,68 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}
+  Registrarse
+{% endblock %}
+
+{% block content %}
+  <div class="signup">
+    <form method="post" class="form">
+      {% csrf_token %}
+      <div>
+        <h2>Bienvenido a todosorteos</h2>
+        <h4>Prepárate para ganar increíbles premios</h4>
+      </div>
+      <div class="form-fields">
+        <h3>Registrarse</h3>
+        <label class="label" for="id_email">Email</label>
+        {{ form.email }}
+
+        <label class="label" for="id_first_name">Nombre</label>
+        {{ form.first_name }}
+
+        <label class="label" for="id_last_name">Apellido</label>
+        {{ form.last_name }}
+
+        <label class="label" for="id_password1">Contraseña</label>
+        {{ form.password1 }}
+
+        <label class="label" for="id_password2">Confirmar contraseña</label>
+        {{ form.password2 }}
+
+        <label class="label" for="id_phone_number">Nro. de teléfono</label>
+        <div class="input-phone-number">
+          {{ form.phone_number }}
+        </div>
+
+
+        <div class="errors">
+          {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+              <div class="error">
+                <p>{{ error }}</p>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          {% for field in form %}
+            {% if field.errors %}
+              {% for error in field.errors %}
+                <div class="error">
+                  <p>{{ error }}</p>
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <button class="button">Registrarse</button>
+        <small>Ya tienes una cuenta?, <a href="{% url 'login' %}"><b>iniciar sesión</b></a></small>
+      </div>
+    </form>
+    <div class="background-login">
+      <img src="{% static 'img/background-login.png' %}" alt="" />
+    </div>
+  </div>
+{% endblock %}
