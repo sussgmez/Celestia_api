@@ -1,5 +1,7 @@
 .venv
 __pycache__
+authentication/migrations/*
+!authentication/migrations/__init__.py
 ecommerce/migrations/*
 !ecommerce/migrations/__init__.py
 db.sqlite3
