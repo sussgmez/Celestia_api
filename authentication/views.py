@@ -5,6 +5,7 @@ from django.contrib.auth import logout
 from .forms import SignUpForm, LoginForm
 
 
+"""
 class SignUpView(View):
     template_name = "authentication/signup.html"
     form_class = SignUpForm
@@ -23,7 +24,7 @@ class SignUpView(View):
         else:
             return render(request, self.template_name, {"form": form})
 
-
+            
 class LoginView(TemplateView):
     template_name = "authentication/login.html"
     form_class = LoginForm
@@ -44,10 +45,11 @@ class LoginView(TemplateView):
                 return redirect("home")
         else:
             return render(request, self.template_name, {"form": form})
-        
-    
 
 
 def logout_handler(request):
     logout(request)
     return redirect("login")
+
+"""
+
