@@ -4,9 +4,6 @@ from .models import  CustomUser
 
 
 class CustomUserAdmin(UserAdmin):
-    fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields':('',)}),
-    )
     add_fieldsets = UserAdmin.add_fieldsets + (
         (None, {'fields':('email',)}),
     )

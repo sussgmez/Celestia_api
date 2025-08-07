@@ -27,7 +27,7 @@ class ProductImage(models.Model):
         "ecommerce.ProductColor",
         verbose_name=_(""),
         on_delete=models.CASCADE,
-        related_name="product_image",
+        related_name="product_images",
     )
     image = models.ImageField(_("Imagen"), upload_to="products")
 
@@ -80,7 +80,7 @@ class ProductSize(models.Model):
     product_color = models.ForeignKey(
         "ecommerce.ProductColor",
         verbose_name=_("Producto (Color)"),
-        related_name="productsize",
+        related_name="product_sizes",
         on_delete=models.CASCADE,
     )
     size = models.CharField(_("Talla"), max_length=50)

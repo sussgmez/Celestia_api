@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-sb4hetcyh(rk0s1eoql4u6o)o%l)e3ymc(06@-ny08qj^=m+7*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.9.110"]
 
 
 # Application definition
@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    "simple_history",
     "rest_framework",
+    "rest_framework_simplejwt",
+    "simple_history",
     "authentication",
     "ecommerce",
 ]
@@ -134,9 +135,15 @@ MEDIAL_ROOT = BASE_DIR / "media"
 AUTH_USER_MODEL = "authentication.CustomUser"
 
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4321",  
-    "http://127.0.0.1:4321",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:4321",
+#     "http://127.0.0.1:4321",
+# ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
